@@ -6,6 +6,27 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak(); // __ means this method belong to MSVC, won't work on Clang or gcc
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line)
+{
+    while(GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error] (" << error << "): " << function <<
+            " " << file << ":" << line << std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource
 {
     std::string VertexSource;
@@ -110,16 +131,22 @@ int main(void)
         return 0;
     }
 
-    float positions[6] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f, 0.5f
+    float positions[] = {
+        -0.5f, -0.5f, // 0
+         0.5f, -0.5f, // 1
+         0.5f,  0.5f, // 2
+        -0.5f,  0.5f, // 3
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
 
     unsigned int buffer_id;
     glGenBuffers(1, &buffer_id); // Create 1 buffer with id 1 
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id); // Tell OpenGL create an array buffer and bind to id:1
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // We just gave OpenGL a bunch of data
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW); // We just gave OpenGL a bunch of data
     // How on a Earth, will OpenGl know, how to interpret this data?!
 
     glEnableVertexAttribArray(0);
@@ -127,10 +154,12 @@ int main(void)
     // with this line of code we define vertex attributes at index 0
     // when we use shader, we will tell hey index 0 pls, and it gives us attribute which pointed at index 0
 
+    unsigned int ibo; // Index Buffer Object
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+
     ShaderProgramSource source = ParseShader("res/shader/basic.shader");
-
-    std::cout << source.VertexSource << std::endl;
-
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
@@ -140,7 +169,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Now OpenGL knows that what to do with this data
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
