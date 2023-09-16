@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource
 {
@@ -135,10 +136,11 @@ int main(void)
 
         VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-        // with this line of code we define vertex attributes at index 0
-        // when we use shader, we will tell hey index 0 pls, and it gives us attribute which pointed at index 0
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+
+        VertexArray va;
+        va.AddBuffer(vb, layout);
 
         IndexBuffer ib(indices, 6);
 
@@ -164,7 +166,7 @@ int main(void)
             glUseProgram(shader);
             glUniform4f(location, r, 1.0, 0.0, 1.0);
 
-            glBindVertexArray(vao);
+            va.Bind();
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
