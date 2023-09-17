@@ -1,4 +1,8 @@
 ﻿  Application.cpp
+  IndexBuffer.cpp
+  Renderer.cpp
   Shader.cpp
+  VertexArray.cpp
+  VertexBuffer.cpp
   Generating Code...
   opengl-cherno.vcxproj -> C:\MyWorkspace\Visual Studio\FirstVisualStudio\opengl-cherno\Debug\opengl-cherno.exe
