@@ -26,7 +26,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -57,13 +57,10 @@ int main(void)
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        unsigned int vao;
-        GLCall(glGenVertexArrays(1, &vao));
-        GLCall(glBindVertexArray(vao));
-
         VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
         VertexBufferLayout layout;
+        layout.Push<float>(2);
         layout.Push<float>(2);
 
         VertexArray va;
@@ -77,9 +74,8 @@ int main(void)
 
         Texture texture("res/textures/crusader.png");
         texture.Bind();
-        shader.SetUniform1i("u_Texture", 0); // this 0 is slot
+        shader.SetUniform1i("u_Texture", 0);
 
-        // Basically unbound anything
         va.Unbind();
         vb.Unbind();
         ib.Unbind();
@@ -91,12 +87,12 @@ int main(void)
         float increment = 0.05f;
         while (!glfwWindowShouldClose(window))
         {
-            renderer.Clear();
+            GLCall(renderer.Clear());
 
             shader.Bind();
             shader.SetUniform4f("u_Color", r, 1.0, 0.0, 1.0);
 
-            renderer.Draw(va, ib, shader);
+            GLCall(renderer.Draw(va, ib, shader));
 
             if (r > 1.0f)
                 increment = -0.05f;

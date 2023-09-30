@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-#include "vendor/stb_image/stb_image.h"
+#include "stb_image/stb_image.h"
 
 Texture::Texture(const std::string& path)
 	: m_RendererID(0), m_FilePath(path), m_LocalBuffer(nullptr), 
@@ -20,6 +20,7 @@ Texture::Texture(const std::string& path)
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer));
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
+	// We are unbind texture and making free m_LocalBuffer. Why? Because, we have already sent it to GPU
 	if (m_LocalBuffer)
 		stbi_image_free(m_LocalBuffer);
 }

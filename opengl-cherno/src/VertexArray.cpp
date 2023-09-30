@@ -26,8 +26,6 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
         GLCall(glEnableVertexAttribArray(i));
         GLCall(glVertexAttribPointer(
             i, element.count, element.type, element.normalized, layout.GetStride(), (const void*) offset));
-        // with this line of code we define vertex attributes at index 0
-        // when we use shader, we will tell hey index 0 pls, and it gives us attribute which pointed at index 0
         offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
     }
    
