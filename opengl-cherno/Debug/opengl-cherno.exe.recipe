@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\MyWorkspace\Visual Studio\FirstVisualStudio\opengl-cherno\Debug\opengl-cherno.exe</FullPath>
+      <FullPath>C:\MyWorkspace\Visual Studio\FirstVisualStudio\opengl-demo\Debug\opengl-cherno.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
