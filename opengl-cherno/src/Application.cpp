@@ -32,7 +32,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(960, 540, "Hello OpenGL", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "Hello OpenGL", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -49,21 +49,29 @@ int main(void)
 
     {
         float positions[] = {
-            100.0f, 100.0f, 0.0f, 0.0f, // 0
-            200.0f, 100.0f, 1.0f, 0.0f, // 1
-            200.0f, 200.0f, 1.0f, 1.0f, // 2
-            100.0f, 200.0f, 0.0f, 1.0f  // 3
+            -100.0f, -100.0f, 0.0f, 0.0f, // 0
+             100.0f, -100.0f, 1.0f, 0.0f, // 1
+             100.0f,  100.0f, 1.0f, 1.0f, // 2
+            -100.0f,  100.0f, 0.0f, 1.0f, // 3
+
+             200.0f, -100.0f, 0.0f, 0.0f, // 4
+             400.0f, -100.0f, 1.0f, 0.0f, // 5
+             400.0f,  100.0f, 1.0f, 1.0f, // 6
+            -200.0f,  100.0f, 0.0f, 1.0f  // 7
         };
 
         unsigned int indices[] = {
             0, 1, 2,
-            2, 3, 0
+            2, 3, 0,
+
+            4, 5, 6,
+            6, 7, 4
         };
 
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        VertexBuffer vb(positions, 4 * 4 * sizeof(float));
+        VertexBuffer vb(positions, 8 * 4 * sizeof(float));
 
         VertexBufferLayout layout;
         layout.Push<float>(2);
@@ -72,14 +80,14 @@ int main(void)
         VertexArray va;
         va.AddBuffer(vb, layout);
 
-        IndexBuffer ib(indices, 6);
+        IndexBuffer ib(indices, 12);
 
         Shader shader("res/shader/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.0, 1.0, 0.0, 1.0);
 
         glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.f, -1.0f, 1.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         Texture texture("res/textures/crusader.png");
         texture.Bind();
@@ -98,29 +106,20 @@ int main(void)
 
         glm::vec3 translation(200, 0, 0);
 
-        float r = 0.0f;
-        float increment = 0.05f;
         while (!glfwWindowShouldClose(window))
         {
             GLCall(renderer.Clear());
 
             ImGui_ImplGlfwGL3_NewFrame();
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
-            glm::mat4 mvp = proj * view * model;
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+                glm::mat4 mvp = proj * view * model;
+                shader.Bind();
+                shader.SetuniformMat4f("u_MVP", mvp);
 
-            shader.Bind();
-            shader.SetUniform4f("u_Color", r, 1.0, 0.0, 1.0);
-            shader.SetuniformMat4f("u_MVP", mvp);
-
-            GLCall(renderer.Draw(va, ib, shader));
-
-            if (r > 1.0f)
-                increment = -0.05f;
-            else if (r < 0.0f)
-                increment = 0.5f;
-
-            r += increment;
+                GLCall(renderer.Draw(va, ib, shader));
+            }
 
             {
                 ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);              
@@ -130,10 +129,7 @@ int main(void)
             ImGui::Render();
             ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
-            /* Swap front and back buffers */
             glfwSwapBuffers(window);
-
-            /* Poll for and process events */
             glfwPollEvents();
         }
     }
